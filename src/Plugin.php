@@ -49,6 +49,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     protected static $io;
 
+    private $installer;
+
     /**
      * Get the event subscriber configuration for this plugin.
      *
@@ -125,8 +127,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         if (static::$io->isVerbose()) {
             static::$io->write('Activating PHP Composter plugin', true);
         }
-        $installer = new Installer(static::$io, $composer);
-        $composer->getInstallationManager()->addInstaller($installer);
+
+        $this->installer = new Installer($io, $composer);
+        $composer->getInstallationManager()->addInstaller($this->installer);
 
         $filesystem = new Filesystem();
         $this->cleanUp($filesystem);
@@ -275,5 +278,14 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 }
             }
         }
+    }
+
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+        $composer->getInstallationManager()->removeInstaller($this->installer);
+    }
+
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
     }
 }
