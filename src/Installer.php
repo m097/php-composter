@@ -15,6 +15,7 @@ use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
 use Composer\Repository\InstalledRepositoryInterface;
 use InvalidArgumentException;
+use React\Promise\PromiseInterface;
 
 /**
  * Class Installer.
@@ -57,6 +58,8 @@ class Installer extends LibraryInstaller
      * @param PackageInterface             $package The package to install.
      *
      * @throws InvalidArgumentException If the package name does not match the required pattern.
+     *
+     * @return PromiseInterface|null
      */
     public function install(InstalledRepositoryInterface $repo, PackageInterface $package)
     {
@@ -68,7 +71,7 @@ class Installer extends LibraryInstaller
             ), true);
         }
 
-        parent::install($repo, $package);
+        $promise =  parent::install($repo, $package);
 
         foreach ($this->getHooks($package) as $prioritizedHook => $method) {
             $array = explode('.', $prioritizedHook);
@@ -89,6 +92,8 @@ class Installer extends LibraryInstaller
             }
             HookConfig::addEntry($hook, $method, $priority);
         }
+
+        return $promise;
     }
 
     /**
